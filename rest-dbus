@@ -16,20 +16,20 @@ busses = {
 
 
 class DBusRestException(Exception):
-
+    print "willen DBusRestException"
     def __init__(self, message, code=403):
         self.code = code
         super(DBusRestException, self).__init__(message)
 
 
 class DBusRestResponse(object):
-
+    print "willen DBusRestResponse"
     def render(self, handler):
         raise NotImplemented()
 
 
 class DBusRestJSONResponse(DBusRestResponse):
-
+    print "willen DBusRestJSONResponse"
     def __init__(self, data):
         self.data = data
 
@@ -41,6 +41,7 @@ class DBusRestJSONResponse(DBusRestResponse):
 
 
 class DBusRestResourceResponse(DBusRestResponse):
+     print "willen DBusRestResourceResponse"
     mime_map = {
         'html': 'text/html',
         'js': 'text/javascript',
@@ -69,7 +70,7 @@ class DBusRestResourceResponse(DBusRestResponse):
 
 
 class DBusRestErrorResonse(DBusRestResponse):
-
+    print "willen DBusRestErrorResonse"
     def __init__(self, ex):
         self.ex = ex
 
@@ -85,7 +86,7 @@ class DBusRestErrorResonse(DBusRestResponse):
 
 
 class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-
+    print "willen DBusRestHandler"
     def handle_root(self):
         return DBusRestJSONResponse({
             'status': 'ok',
@@ -360,6 +361,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 class HTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     def __init__(self, address, handler):
+	print "willen HTTPServer"
         bind = True
         if os.environ.get('LISTEN_PID', None) == str(os.getpid()):
             bind = False
@@ -377,5 +379,6 @@ class HTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
         self.server_activate()
 
 if __name__ == '__main__':
+    print "willen rest-dbus"
     server = HTTPServer(('', 3000), DBusRestHandler)
     server.serve_forever()
