@@ -41,7 +41,7 @@ class DBusRestJSONResponse(DBusRestResponse):
 
 
 class DBusRestResourceResponse(DBusRestResponse):
-     print "willen DBusRestResourceResponse"
+    print "willen DBusRestResourceResponse"
     mime_map = {
         'html': 'text/html',
         'js': 'text/javascript',
@@ -75,6 +75,7 @@ class DBusRestErrorResonse(DBusRestResponse):
         self.ex = ex
 
     def render(self, handler):
+        print "willen render"
         err = {
             'status': 'error',
             'error': self.ex.message,
@@ -88,12 +89,14 @@ class DBusRestErrorResonse(DBusRestResponse):
 class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     print "willen DBusRestHandler"
     def handle_root(self):
+        print "willen handle_root"
         return DBusRestJSONResponse({
             'status': 'ok',
             'busses': [{'name': x} for x in busses.keys()],
         })
 
     def handle_bus(self):
+        print "willen handle_bus"
         objects = self.bus.list_names()
         objects.sort()
         return DBusRestJSONResponse({
@@ -103,12 +106,14 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def get_object_or_404(self, bus_name, obj_path):
         try:
+            print "willen get_object_or_404"
             obj = self.bus.get_object(bus_name, obj_path)
         except dbus.DBusException:
             raise DBusRestException("Object Not Found", 404)
         return obj
 
     def handle_service(self, bus_name):
+        print "willen handle_service"
         data = IntrospectionParser(bus_name, self.bus).introspect()
         objects = [{'path': x} for x in data.iterkeys()]
 
@@ -119,6 +124,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         })
 
     def handle_object(self, obj):
+        print "willen handle_object"
         iface = dbus.Interface(obj, 'org.freedesktop.DBus.Introspectable')
 
         interfaces = []
@@ -135,6 +141,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         })
 
     def handle_interface(self, obj, interface_name):
+        print "willen handle_interface"
         iface = dbus.Interface(obj, 'org.freedesktop.DBus.Introspectable')
 
         interface_node = None
@@ -154,6 +161,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     obj.object_path + '/' + interface_name)
 
         def parse_method(node):
+            print "willen parse_method"
             args = []
             for child in node:
                 if child.tag == 'arg':
@@ -166,6 +174,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             }
 
         def parse_signal(node):
+            print "willen parse_signal"
             args = []
             for child in node:
                 if child.tag == 'arg':
@@ -199,6 +208,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         })
 
     def handle_property(self, obj, interface_name, property_name):
+        print "willen handle_property"
         iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
         try:
             value = iface.Get(interface_name, property_name)
@@ -215,6 +225,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         })
 
     def dispatch_bus(self, parts):
+        print "willen dispatch_bus"
 
         if not parts:
             return self.handle_root()
@@ -258,9 +269,11 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         raise DBusRestException("Not Found", 404)
 
     def dispatch_resource(self, parts):
+        print "willen dispatch_resource"
         return DBusRestResourceResponse(parts[0])
 
     def dispatch(self):
+        print "willen dispatch"
         parts = filter(bool, self.path.split('/'))
 
         if parts:
@@ -277,6 +290,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return self.dispatch_resource(['index.html'])
 
     def handle_call(self, obj, interface_name, call_name, data):
+        print "willen handle_call"
         iface = dbus.Interface(obj, interface_name)
         call = getattr(iface, call_name)
         d = {
@@ -297,6 +311,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return DBusRestJSONResponse(d)
 
     def dispatch_call(self, data):
+        print "willen dispatch_call"
         parts = filter(bool, self.path.split('/'))
         if not parts:
             raise DBusRestException("Not Found", 404)
@@ -341,6 +356,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return self.handle_call(obj, interface_name, call_name, data)
 
     def do_GET(self):
+        print "willen do_GET"
         try:
             response = self.dispatch()
         except DBusRestException, ex:
@@ -349,6 +365,7 @@ class DBusRestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         response.render(self)
 
     def do_POST(self):
+        print "willen do_POST"
         length = int(self.headers.getheader('content-length'))
         data = json.loads(self.rfile.read(length))
         try:
